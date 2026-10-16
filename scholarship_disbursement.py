@@ -1,4 +1,4 @@
-"""Scholarship disbursement ledger: grant, disburse, archive and count awards."""
+"""Scholarship disbursement ledger: grant, disburse, archive, count awards."""
 import sqlite3
 
 conn = sqlite3.connect(":memory:")
@@ -13,7 +13,8 @@ def grant(student, scheme, amount, audit=None):
     if audit is None:
         audit = []
     conn.execute(
-        "INSERT INTO awards (student, scheme, amount, disbursed) VALUES (?, ?, ?, 0)",
+        "INSERT INTO awards (student, scheme, amount, disbursed) "
+        "VALUES (?, ?, ?, 0)",
         (student, scheme, amount),
     )
     audit.append(student)
@@ -21,8 +22,10 @@ def grant(student, scheme, amount, audit=None):
 
 
 def disburse(award_id):
-    """Mark an award as disbursed and return its amount, or None if not found."""
-    row = conn.execute("SELECT amount FROM awards WHERE id = ?", (award_id,)).fetchone()
+    """Mark an award as disbursed; return its amount, or None if missing."""
+    row = conn.execute(
+        "SELECT amount FROM awards WHERE id = ?", (award_id,)
+    ).fetchone()
     if row is None:
         return None
     conn.execute("UPDATE awards SET disbursed = 1 WHERE id = ?", (award_id,))
